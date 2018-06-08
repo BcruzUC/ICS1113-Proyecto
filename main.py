@@ -48,9 +48,9 @@ m = Model('Interescolar')
 
 """  VARIABLES  """
 
-x = m.addVars(days, modules, trials, ub=1, name='x')
+x = m.addVars(days, modules, trials, vtype=GRB.BINARY, name='x')
 
-y = m.addVars(num_byCat, schools, days, modules, trials, ub=1, name='y')  # Categoria k del colegio c, la prueba p en modulo m
+y = m.addVars(num_byCat, schools, days, modules, trials, vtype=GRB.BINARY, name='y')  # Categoria k del colegio c, la prueba p en modulo m
 
 # print(y)
 
