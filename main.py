@@ -48,6 +48,7 @@ m = Model('Interescolar')
 
 """  VARIABLES  """
 
+# falta agregar categoria
 x = m.addVars(days, modules, trials, vtype=GRB.BINARY, name='x')
 
 y = m.addVars(num_byCat, schools, days, modules, trials, vtype=GRB.BINARY, name='y')  # Categoria k del colegio c, la prueba p en modulo m
@@ -56,28 +57,30 @@ y = m.addVars(num_byCat, schools, days, modules, trials, vtype=GRB.BINARY, name=
 """" RESTRICCIONES X """
 
 # Cantidad de pruebas por dia mayor igual a 2
-rx1 = m.addConstrs((x.sum(day, '*') >= 2
-                      for day in days), "Cant_pruebas")
+rx1 = m.addConstrs((x.sum(d, '*') >= 2 for d in days), "Cant_pruebas")
 
-# Solo puede asignarse una prueba en cada modulo
-rx2 = m.addConstrs((x.sum(day, mod, '*') <= 2 for day in days for mod in modules), name='flujo')
+# Solo puede asignarse 2 pruebas en cada modulo
+rx2 = m.addConstrs((x.sum(d, m, '*') <= 2 for d in days for m in modules), name='flujo')
 
 # Numero total de  pruebas a hacer tiene que ser iguala 6
-rx3 = m.addConstr((x.sum('*') == 6), name='total_pruebas')
+rx3 = m.addConstr((x.sum('*') <= 30), name='total_pruebas')
 
 ## Maximo numero de pruebas tipo velocidad igual a 2
 # rx4 = m.addConstr((quicksum(x[d, m, 'velocidad'] for d in days for m in modules) <= 2), name='limite_vel')
 
 """  RETRICCIONES Y  """
 
+# Solo una categoria de cada colegio asignada a un modulo y dia especifico
 ry1 = m.addConstrs(y.sum('*', c, d, m, p)
                    <= 1 for c in schools
                    for d in days for m in modules for p in trials)
 
+# Solo compite una vez en cada prueba, cada categoria
 ry2 = m.addConstrs(y.sum(k, c, '*', d, p) <= 1 for k in category for c in schools for d in days for p in trials)
 
-"""  RELACION VARIABLE Y - X  """
 
+"""  RELACION VARIABLE Y - X  """
+# Para que se asigne la variable x=1 entonces tienen que competir los 5 colegios de la categoria debida
 rxy1 = m.addConstrs(y.sum(k, '*', d, m, p)/len(schools) >= x[d, m, p]
                    for k in category for d in days for m in modules for p in trials)
 
