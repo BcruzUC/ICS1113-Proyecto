@@ -73,16 +73,16 @@ rx4 = m.addConstr((quicksum(x[d, m, 'velocidad'] for d in days for m in modules)
 
 #REVISAR
 # Solo puede haber una categoria en la prueba p en el modulo m
-# ry1 = m.addConstrs(y('juvenil', c, d, m, p) +
-#                    y('intermedia', c, d, m, p) +
-#                    y('superior', c, d, m, p)
-#                    <= 1 for c in schools
-#                    for d in days for m in modules for p in trials)
-#
+ry1 = m.addConstrs(y('juvenil', c, d, m, p) +
+                   y('intermedia', c, d, m, p) +
+                   y('superior', c, d, m, p)
+                   <= 1 for c in schools
+                   for d in days for m in modules for p in trials)
+
 # ry1 = m.addConstrs(y.sum())
-#
-# ry2 = m.addConstrs(y.sum(k, '*', d, m, p) >= len(schools)
-#                    for k in category for d in days for m in modules for p in trials)
+
+ry2 = m.addConstrs(y.sum(k, '*', d, m, p) >= len(schools)
+                   for k in category for d in days for m in modules for p in trials)
 
 m.update()
 
