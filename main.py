@@ -52,7 +52,6 @@ x = m.addVars(days, modules, trials, vtype=GRB.BINARY, name='x')
 
 y = m.addVars(num_byCat, schools, days, modules, trials, vtype=GRB.BINARY, name='y')  # Categoria k del colegio c, la prueba p en modulo m
 
-# print(y)
 
 """" RESTRICCIONES X """
 
@@ -87,8 +86,8 @@ rxy1 = m.addConstrs(y.sum(k, '*', d, m, p)/len(schools) >= x[d, m, p]
 
 m.update()
 
-print(len(ry1), ry1)
-print(len(ry2), ry2)
+# print(len(ry1), ry1)
+# print(len(ry2), ry2)
 
 # ry2 = m.addConstr()
 
