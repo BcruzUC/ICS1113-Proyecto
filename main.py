@@ -29,7 +29,7 @@ schools, juvenil, intermedia, superior = multidict({
 # crear con modulos
 
 days = ['viernes', 'sabado']
-modules = ['mod'+str(i) for i in range(10)]
+modules = ['mod'+str(i) for i in range(20)]
 
 trials, duration, rest, place = multidict({
     'velocidad':  [10, 5, 1],
@@ -48,9 +48,9 @@ m = Model('Interescolar')
 
 """  VARIABLES  """
 
-x = m.addVars(days, modules, trials, ub=1, name='module')
+x = m.addVars(days, modules, trials, ub=1, name='x')
 
-y = m.addVars(num_byCat, schools, days, modules, trials, ub=1, name='category')  # Categoria k del colegio c, la prueba p en modulo m
+y = m.addVars(num_byCat, schools, days, modules, trials, ub=1, name='y')  # Categoria k del colegio c, la prueba p en modulo m
 
 # print(y)
 
@@ -61,32 +61,34 @@ rx1 = m.addConstrs((x.sum(day, '*') >= 2
                       for day in days), "Cant_pruebas")
 
 # Solo puede asignarse una prueba en cada modulo
-rx2 = m.addConstrs((x.sum(day, mod, '*') <= 1 for day in days for mod in modules), name='flujo')
+rx2 = m.addConstrs((x.sum(day, mod, '*') <= 2 for day in days for mod in modules), name='flujo')
 
 # Numero total de  pruebas a hacer tiene que ser iguala 6
 rx3 = m.addConstr((x.sum('*') == 6), name='total_pruebas')
 
-# Maximo numero de pruebas tipo velocidad igual a 2
-rx4 = m.addConstr((quicksum(x[d, m, 'velocidad'] for d in days for m in modules) <= 2), name='limite_vel')
+## Maximo numero de pruebas tipo velocidad igual a 2
+# rx4 = m.addConstr((quicksum(x[d, m, 'velocidad'] for d in days for m in modules) <= 2), name='limite_vel')
 
 """  RETRICCIONES Y  """
 
-#REVISAR
-# Solo puede haber una categoria en la prueba p en el modulo m
-ry1 = m.addConstrs(y('juvenil', c, d, m, p) +
-                   y('intermedia', c, d, m, p) +
-                   y('superior', c, d, m, p)
+ry1 = m.addConstrs(y.sum('*', c, d, m, p)
                    <= 1 for c in schools
                    for d in days for m in modules for p in trials)
 
-# ry1 = m.addConstrs(y.sum())
+ry2 = m.addConstrs(y.sum(k, c, '*', d, p) <= 1 for k in category for c in schools for d in days for p in trials)
 
-ry2 = m.addConstrs(y.sum(k, '*', d, m, p) >= len(schools)
+"""  RELACION VARIABLE Y - X  """
+
+rxy1 = m.addConstrs(y.sum(k, '*', d, m, p)/len(schools) >= x[d, m, p]
                    for k in category for d in days for m in modules for p in trials)
+
+
+
 
 m.update()
 
-# print(ry2)
+print(len(ry1), ry1)
+print(len(ry2), ry2)
 
 # ry2 = m.addConstr()
 
@@ -98,14 +100,13 @@ m.update()
 
 m.optimize()
 
-m.printAttr('x')
-
 status = m.status
 if status == GRB.Status.UNBOUNDED:
     print('The model cannot be solved because it is unbounded')
     exit(0)
 if status == GRB.Status.OPTIMAL:
     print('The optimal objective is %g' % m.objVal)
+    m.printAttr('x')
     exit(0)
 if status != GRB.Status.INF_OR_UNBD and status != GRB.Status.INFEASIBLE:
     print('Optimization was stopped with status %d' % status)
@@ -121,7 +122,6 @@ else:
 print('\nThe following constraint(s) cannot be satisfied:')
 for c in m.getConstrs():
     if c.IISConstr:
-        print('%s' % c.constrName)
-
+        print('{}: {}'.format(c.constrName, m.getConstrByName(c.constrName)))
 
 
