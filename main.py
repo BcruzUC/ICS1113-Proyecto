@@ -47,8 +47,6 @@ delay_list = [15, 15, 15, 30, 35, 40, 35, 20, 25, 25, 25, 25, 20, 25, 25, 20]
 delay_couples = tuple_gen(trials)
 time_between = {delay_couples[i]: delay_list[i] for i in range(len(delay_list))}
 
-print(time_between['vallas', 'vallas'])
-
 m = Model('Interescolar')
 
 """  VARIABLES  """
